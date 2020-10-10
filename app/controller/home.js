@@ -7,7 +7,6 @@ const homeController = {
 	index: async (req, res) => {
 		try{
 			if(req.user){
-				console.log(req.user);
 				const productColors = await fetch("http://erpjariomilitar.com/product/colorList");
 				return res.render('home', { user: req.user, productColors: productColors });
 			};
@@ -29,9 +28,9 @@ const homeController = {
 		res.redirect('/');
 	},
 	signup: async (req, res) => {
-		if(!await userController.verifyAccess(req, res, ['adm'])){
-			return res.redirect('/');
-		};
+		// if(!await userController.verifyAccess(req, res, ['adm'])){
+		// 	return res.redirect('/');
+		// };
 		res.render('user/signup', { user: req.user, message: req.flash('signupMessage')});
 	},
 	successfulSignup: (req, res) => {

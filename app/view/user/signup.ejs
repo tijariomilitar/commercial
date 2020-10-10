@@ -4,23 +4,32 @@
 	</head>
 	<body>
 		<div class="main">
-	        <% include ./../partials/header %>
-	        <% include ./../partials/nav %>
+	        <header>
+				<div onclick="window.location.href='/'" href="#default" class="favicon"><img class="favicon-image" src="/images/favicon/favicon-black.png"></div>
+				<div class="right">
+					<a class="active" href="/login">Log in</a>
+				</div>
+			</header>
 			<section>
 				<div class="container">
 					<div class="box-1">
 						<% if (message.length > 0) { %>
                             <div class="alert-msg"><%= message %></div>
                         <% } %>
-					<form action="/user/signup" class="box-1" method="post">
+                        <div class="box-1"></div>
+                        <form id="customer-lp-create-form" action="/user/signup" class="box-1" method="post" style="display:block">
 							<h4 class="underline">Preencha as informações para realizar seu cadastro!</h4>
-							<input type="text" class="btn-generic-big" name="name" maxlength="60" autocomplete="off" placeholder="Nome">
-							<input type="email" class="btn-generic-big" name="email" id="email" maxlength="60" autocomplete="off" placeholder="E-mail">
-							<input type="password" class="btn-generic-big" name="password" maxlength="45" autocomplete="off" placeholder="Senha">
-							<input type="password" class="btn-generic-big" name="confirmPassword" maxlength="45" autocomplete="off" placeholder="Confirmar senha">
-							<p class="underline"></p>
-							<button type="submit" class="btn-submit">Cadastrar</button>
-					</form>
+
+							<input type="text" name="cpf" class="btn-generic-big" onkeydown="lib.mask.CNPJ(this, mCPF);" maxlength="14" placeholder="CNPJ"><br>
+							<!-- 
+							<input type="text" name="name" class="btn-generic-big" maxlength="60" autocomplete="off" placeholder="CNPJ"><br>
+							<input type="text" name="name" class="btn-generic-big" maxlength="60" autocomplete="off" placeholder="Nome"><br>
+							<input type="email" name="email" class="btn-generic-big" maxlength="60" autocomplete="off" placeholder="E-mail"><br>
+							<input type="password" name="password" class="btn-generic-big" maxlength="45" autocomplete="off" placeholder="Senha"><br>
+							<input type="password" name="confirmPassword" class="btn-generic-big" maxlength="45" autocomplete="off" placeholder="Confirmar senha">
+							<p class="underline"></p> -->
+							<button type="submit" name="submit" class="btn-submit">Cadastrar</button>
+						</form>
 					</div>
 				</div>
 			</section>
@@ -32,18 +41,70 @@
         <% include ./partial %>
 	</footer>
 	<script>
-		function filldate(){
-			const Months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']; 
-			for(i=1;i<32;i++){
-				document.getElementById('day').innerHTML += "<option value="+i+">"+i+"</option>";
-			};
-			for(month of Months){
-				document.getElementById('month').innerHTML += "<option value="+month+">"+month+"</option>";
-			};
-			for(i=2019;i>1900;i--){
-				document.getElementById('year').innerHTML += "<option value="+i+">"+i+"</option>";
+		// function filldate(){
+		// 	const Months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro']; 
+		// 	for(i=1;i<32;i++){
+		// 		document.getElementById('day').innerHTML += "<option value="+i+">"+i+"</option>";
+		// 	};
+		// 	for(month of Months){
+		// 		document.getElementById('month').innerHTML += "<option value="+month+">"+month+"</option>";
+		// 	};
+		// 	for(i=2019;i>1900;i--){
+		// 		document.getElementById('year').innerHTML += "<option value="+i+">"+i+"</option>";
+		// 	}
+		// };
+		// filldate();
+
+			function inputMask(objeto,mascara) {
+				obj=objeto
+				masc=mascara
+				setTimeout("fMascEx()",1)
 			}
-		};
-		filldate();
+
+			function fMascEx() {
+				obj.value=masc(obj.value)
+			}
+			function mTel(tel) {
+				tel=tel.replace(/\D/g,"")
+				tel=tel.replace(/^(\d)/,"($1")
+				tel=tel.replace(/(.{3})(\d)/,"$1)$2")
+				if(tel.length == 9) {
+					tel=tel.replace(/(.{1})$/,"-$1")
+				} else if (tel.length == 10) {
+					tel=tel.replace(/(.{2})$/,"-$1")
+				} else if (tel.length == 11) {
+					tel=tel.replace(/(.{3})$/,"-$1")
+				} else if (tel.length == 12) {
+					tel=tel.replace(/(.{4})$/,"-$1")
+				} else if (tel.length > 12) {
+					tel=tel.replace(/(.{4})$/,"-$1")
+				}
+				return tel;
+			}
+			function mCNPJ(cnpj){
+				cnpj=cnpj.replace(/\D/g,"")
+				cnpj=cnpj.replace(/^(\d{2})(\d)/,"$1.$2")
+				cnpj=cnpj.replace(/^(\d{2})\.(\d{3})(\d)/,"$1.$2.$3")
+				cnpj=cnpj.replace(/\.(\d{3})(\d)/,".$1/$2")
+				cnpj=cnpj.replace(/(\d{4})(\d)/,"$1-$2")
+				return cnpj
+			}
+			function mCPF(cpf){
+				cpf=cpf.replace(/\D/g,"")
+				cpf=cpf.replace(/(\d{3})(\d)/,"$1.$2")
+				cpf=cpf.replace(/(\d{3})(\d)/,"$1.$2")
+				cpf=cpf.replace(/(\d{3})(\d{1,2})$/,"$1-$2")
+				return cpf
+			}
+			function mCEP(cep){
+				cep=cep.replace(/\D/g,"")
+				cep=cep.replace(/^(\d{2})(\d)/,"$1.$2")
+				cep=cep.replace(/\.(\d{3})(\d)/,".$1-$2")
+				return cep
+			}
+			function mNum(num){
+				num=num.replace(/\D/g,"")
+				return num
+			}
 	</script>
 </html>
