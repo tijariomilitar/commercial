@@ -10,7 +10,7 @@
 				<a class="active" href="/login">Log in</a>
 			</div>
 		</header>
-        <% include ./partials/nav %>
+        <!-- <% include ./partials/nav %> -->
 		<section>
 			<div class="container">
                 <!-- <div class="box one ground box-border-hover margin-top-15 padding-5">
@@ -62,13 +62,13 @@
 
                 <div class="box two ground margin-top-15 padding-10">
                     <h3 class="title-soft underline center">Calcular juros</h3>
-                    <form id="interest-calculate-form" class="box one padding-10">
+                    <form id="proposal-form" class="box one padding-10">
                         <div class="container">
                             <input type="number" class="btn five price box-hover padding-5" name="value" step="0.01" value="" placeholder="Valor" onfocus="if(this.value < 0.01){this.value=''}" onblur="if(this.value < 0.01){this.value=''}"/>
-                            <select class="btn five bold box-hover padding-5" name="time">
-                                <option value="30">30 dias</option>
-                                <option value="60">60 dias</option>
-                                <option value="90">90 dias</option>
+                            <select class="btn five bold box-hover padding-5" name="times">
+                                <option value="1">30 dias</option>
+                                <option value="2">60 dias</option>
+                                <option value="3">90 dias</option>
                             </select>
                             <input type="number" class="btn five bold box-hover padding-5" name="fixed-interest-rate" step="0.01" value="" placeholder="Taxa fixa" onfocus="if(this.value < 0.01){this.value=''}" onblur="if(this.value < 0.01){this.value=''}"/>
                             <input type="number" class="btn five bold box-hover padding-5" name="floating-interest-rate" step="0.01" value="" placeholder="Taxa variável" onfocus="if(this.value < 0.01){this.value=''}" onblur="if(this.value < 0.01){this.value=''}"/>
@@ -77,9 +77,7 @@
                     </form>
                 </div>
 
-                <div class="box two ground margin-top-15 padding-10">
-                    
-                </div>
+                <div id="proposal-report" class="box two ground margin-top-15 padding-10"></div>
 			</div>
 		</section>
 		<div id="ajax-loader" class="ajax-loader">
@@ -90,19 +88,75 @@
         <% include ./partials/footer %>
         <% include ./product/partial %>
         <script>
-            //valor / (time/
-            document.getElementById("interest-calculate-form").addEventListener("submit", (e) => {
+            //valor / (times/
+            document.getElementById("proposal-form").addEventListener("submit", (e) => {
                 e.preventDefault();
                 e.stopPropagation();
 
-                let form = {
-                    value: document.getElementById("interest-calculate-form").elements.namedItem("value").value,
-                    time: document.getElementById("interest-calculate-form").elements.namedItem("time").value,
-                    fixed_interest_rate: document.getElementById("interest-calculate-form").elements.namedItem("fixed-interest-rate").value,
-                    floating_interest_rate: document.getElementById("interest-calculate-form").elements.namedItem("floating-interest-rate").value
+                let proposal = {
+                    value: parseFloat(document.getElementById("proposal-form").elements.namedItem("value").value),
+                    times: parseInt(document.getElementById("proposal-form").elements.namedItem("times").value),
+                    fixed_interest_rate: parseFloat(document.getElementById("proposal-form").elements.namedItem("fixed-interest-rate").value),
+                    floating_interest_rate: parseFloat(document.getElementById("proposal-form").elements.namedItem("floating-interest-rate").value),
+
+                    installments: [],
+                    total_value: 0
                 };
 
-                console.log(form);
+                if(!proposal.value || proposal.value == NaN){
+                    return alert("O valor da proposta é inválido!");
+                };
+
+                if(!proposal.times || proposal.times == NaN){
+                    return alert("O parcelamento da proposta é inválido!");
+                };
+
+                if(!proposal.fixed_interest_rate || proposal.fixed_interest_rate == NaN){
+                    return alert("A taxa fixa da proposta é inválida!");
+                };
+
+                if(!proposal.floating_interest_rate || proposal.floating_interest_rate == NaN){
+                    return alert("A taxa variável da proposta é inválida!");
+                };
+
+                function factoryProposal(proposal){
+                    let result1 = lib.roundValue(proposal.value + (proposal.value * (proposal.fixed_interest_rate / 100)));
+                    proposal.floating_interest_rate = lib.roundValue(proposal.floating_interest_rate * proposal.times);
+                    proposal.total_value = lib.roundValue(result1 + (result1 * proposal.floating_interest_rate / 100));
+                                    
+                    for(i=1;i<=proposal.times;i++){
+                        let installment = {
+                            time: i,
+                            value: lib.roundValue(proposal.total_value / proposal.times)
+                        };
+
+                        proposal.installments.push(installment);
+                    };
+
+                    console.log(proposal);
+                    return proposal
+                };
+
+                proposal = factoryProposal(proposal);
+                // console.log(proposal);
+
+                let html = "";
+                html += "<div class='container'>";
+                html += "<div class='mobile-box two center box-hover padding-5'>Parcelas: "+proposal.times+"</div>";
+                html += "<div class='mobile-box two center box-hover padding-5'>Valor total: $"+proposal.total_value.toFixed(2)+"</div>";
+
+                for(i in proposal.installments){
+                    html += "<div class='box one box-hover padding-5'>";
+                    html += "<div class='container'>";
+                    html += "<div class='mobile-box two center'>"+proposal.installments[i].time+"ª parcela:</div>";
+                    html += "<div class='mobile-box two center'>$"+proposal.installments[i].value.toFixed(2)+"</div>";
+                    html += "</div>";
+                    html += "</div>";
+                };
+
+                html += "</div>";
+
+                document.getElementById("proposal-report").innerHTML = html;
             });
         </script>
 	</footer>
